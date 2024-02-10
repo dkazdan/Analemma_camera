@@ -27,11 +27,9 @@ Write directory space-clearing
 from picamera2 import Picamera2, Preview
 from os import system
 from time import sleep
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 import schedule
 
-""" TEST VALUE, CHANGE THIS """
-eclipse_date=date(2024,2,6)
 # eclipse yr/mo/day/hr/min/sec
 # from https://www.timeanddate.com/eclipse/in/@41.49402,-81.57778?iso=20240408
 eclipse_begins =datetime(2024,4,8,17,59,31) # first contact
@@ -39,7 +37,12 @@ totality_begins=datetime(2024,4,8,19,13,56) # second contact
 totality_max   =datetime(2024,4,8,19,15,49) # maximum eclipse
 totality_ends  =datetime(2024,4,8,19,17,42) # third contact
 eclipse_ends   =datetime(2024,4,8,20,29, 8) # fourth contact
-test_date=date(2024,1,29)
+eclipse_date=eclipse_begins.date()
+print('eclipse date: ', eclipse_date)
+"""
+TEST DATE: DELETE THIS FOR ACTUAL ANALEMMA RUN
+"""
+eclipse_date=date(2024,2,10) # DELETE THIS LINE
 temp_storage_dir='/home/DK/Pictures/analemma_to_be_uploaded/'
 
 picam2 = Picamera2()
@@ -115,12 +118,13 @@ def take_analemma_photos():
         take_photos(n=10, interval=tenth_timedif.total_seconds())# start at third contact. Fourth contact ends the sequence
     else: # skip ahead to regular analemma times
         print('No eclipse today: wait for second contact time')
-        while (datetime.now() < totality_begins):  # idle until eclipse time
+        while (datetime.now().time() < totality_begins.time()):  # idle until eclipse time
             sleep(1)	# keeps microprocessor cooler than using pass here.
         timedif=totality_ends-totality_begins # same times as eclipse totality
         tenth_timedif=timedif/10
         print('starting regular daily analemma photos')
-        take_photos(n=10, interval=tenth_timedif.total_seconds())# start at second contact. Third contact in next set
+        # 11 photos over 10 intervals
+        take_photos(n=11, interval=tenth_timedif.total_seconds())# start at second contact. Third contact in next set
 
 def hms_str(dt): # create string for schedule from datetime objecti 
     hms_string= str(dt.hour)+':'\
