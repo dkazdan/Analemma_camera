@@ -17,17 +17,14 @@ Replaces sun shade,
 Continues photos to fourth contact.
 
 TODO:
-Complete photo timing sequence for eclipse day.
-Write photo timing sequences for non-eclipse days.
-Write file transfer to Dropbox
-Write directory space-clearing
-
+Wire servo and implement it.
 """
 
 from picamera2 import Picamera2, Preview
 from os import system
 from time import sleep
 from datetime import date, datetime, time, timedelta
+from Class_analemma_dropbox_handler import Analemma_dropbox_handler
 import schedule
 
 # eclipse yr/mo/day/hr/min/sec
@@ -37,7 +34,7 @@ totality_begins=datetime(2024,4,8,19,13,56) # second contact
 totality_max   =datetime(2024,4,8,19,15,49) # maximum eclipse
 totality_ends  =datetime(2024,4,8,19,17,42) # third contact
 eclipse_ends   =datetime(2024,4,8,20,29, 8) # fourth contact
-eclipse_date=eclipse_begins.date()
+eclipse_date = eclipse_begins.date()
 print('eclipse date: ', eclipse_date)
 """
 TEST DATE: DELETE THIS FOR ACTUAL ANALEMMA RUN
@@ -125,6 +122,13 @@ def take_analemma_photos():
         print('starting regular daily analemma photos')
         # 11 photos over 10 intervals
         take_photos(n=11, interval=tenth_timedif.total_seconds())# start at second contact. Third contact in next set
+    ADH = Analemma_dropbox_handler()
+    #print (ADH.dummy_method()) works.
+    ADH.upload_new_files_to_dropbox()
+    ADH.move_files()
+    # TODO: Add clear disk space if disk getting full
+    # DESTRUCTOR HERE? Probably not necessary
+    
 
 def hms_str(dt): # create string for schedule from datetime objecti 
     hms_string= str(dt.hour)+':'\
@@ -133,11 +137,15 @@ def hms_str(dt): # create string for schedule from datetime objecti
     return hms_string
     
 # set up the analemma schedule
-eclipse_begins_str=hms_str(eclipse_begins)
-schedule.every().day.at(eclipse_begins_str).do(take_analemma_photos)
+if __name__ == '__main__':
+    
+    print('in main')
 
-while True:
-    schedule.run_pending()
-    sleep(1)  # keeps microprocessor cooler
+    eclipse_begins_str=hms_str(eclipse_begins) # time only
+    schedule.every().day.at(eclipse_begins_str).do(take_analemma_photos)
 
-print('\ndone')
+    while True:
+        schedule.run_pending()
+        sleep(1)  # keeps microprocessor cooler
+
+    print('\ndone')
